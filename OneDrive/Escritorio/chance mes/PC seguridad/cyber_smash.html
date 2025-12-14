@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Smash: Arcade Defense</title>
+    <!-- Fuente Pixel Art -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- CONTENEDOR PRINCIPAL ENCAPSULADO -->
+<div id="cyber-smash-root">
+    <style>
+        /* --- ESTILOS ENCAPSULADOS --- */
+        #cyber-smash-root {
+            --cs-bg: #0f172a;
+            --cs-neon-blue: #00f3ff;
+            --cs-neon-pink: #ff00ff;
+            --cs-neon-green: #00ff00;
+            --cs-neon-red: #ff0000;
+            --cs-font: 'Press Start 2P', cursive;
+
+            font-family: var(--cs-font);
+            background-color: var(--cs-bg);
+            color: white;
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid var(--cs-neon-blue);
+            border-radius: 8px;
+            box-shadow: 0 0 20px var(--cs-neon-blue);
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        #cyber-smash-root canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* UI OVERLAYS */
+        #cyber-smash-root .ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #cyber-smash-root .hud-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            text-shadow: 2px 2px 0 #000;
+            z-index: 10;
+        }
+
+        #cyber-smash-root .hearts {
+            color: var(--cs-neon-red);
+            font-size: 16px;
+        }
+
+        /* PANTALLAS (Start, Level Up, Game Over) */
+        #cyber-smash-root .screen-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+
+        #cyber-smash-root .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #cyber-smash-root h1 {
+            font-size: 32px;
+            color: var(--cs-neon-blue);
+            text-shadow: 4px 4px 0 var(--cs-neon-pink);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        #cyber-smash-root p {
+            font-size: 12px;
+            line-height: 1.8;
+            color: #cbd5e1;
+            max-width: 80%;
+            margin-bottom: 30px;
+        }
+
+        #cyber-smash-root .btn-pixel {
+            background: var(--cs-neon-pink);
+            border: 4px solid white;
+            color: white;
+            font-family: var(--cs-font);
+            font-size: 14px;
+            padding: 15px 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 #000;
+            transition: transform 0.1s;
+        }
+
+        #cyber-smash-root .btn-pixel:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 #000;
+        }
+
+        #cyber-smash-root .btn-pixel:hover {
+            background: #d900d9;
+        }
+
+        /* MODAL GAME OVER (Pixel Art Style) */
+        #cyber-smash-root .modal-box {
+            border: 4px solid var(--cs-neon-green);
+            background: #000;
+            padding: 20px;
+            max-width: 90%;
+            position: relative;
+        }
+
+        #cyber-smash-root .ai-avatar {
+            width: 60px;
+            height: 60px;
+            background: var(--cs-neon-green);
+            margin: 0 auto 15px;
+            image-rendering: pixelated;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: black;
+        }
+
+        #cyber-smash-root .flash-red {
+            animation: flashRed 0.2s;
+        }
+
+        @keyframes flashRed {
+            0% { box-shadow: inset 0 0 0 50px rgba(255, 0, 0, 0.5); }
+            100% { box-shadow: inset 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 600px) {
+            #cyber-smash-root h1 { font-size: 20px; }
+            #cyber-smash-root { height: 500px; }
+        }
+    </style>
+
+    <!-- CANVAS -->
+    <canvas id="cs-canvas"></canvas>
+
+    <!-- HUD -->
+    <div class="ui-layer" id="cs-ui-layer">
+        <div class="hud-top">
+            <div>SCORE: <span id="cs-score">0</span></div>
+            <div>LEVEL: <span id="cs-level">1</span></div>
+            <div class="hearts" id="cs-lives">❤️❤️❤️</div>
+        </div>
+    </div>
+
+    <!-- PANTALLA INICIO -->
+    <div id="cs-screen-start" class="screen-overlay">
+        <h1>CYBER SMASH</h1>
+        <p>
+            ¡Protege el sistema!<br><br>
+            DESTRUYE: Contraseñas malas, Phishing y Virus.<br>
+            NO TOQUES: Candados 🔒, Escudos 🛡️ y Llaves 🔑.<br><br>
+            ¡Haz clic o toca para destruir!
+        </p>
+        <button class="btn-pixel" id="cs-btn-start">INICIAR MISIÓN</button>
+    </div>
+
+    <!-- PANTALLA LEVEL UP -->
+    <div id="cs-screen-levelup" class="screen-overlay hidden">
+        <h1 id="cs-levelup-title">¡NIVEL 2!</h1>
+        <p id="cs-levelup-msg" style="color: var(--cs-neon-green);">NUEVA AMENAZA DETECTADA</p>
+    </div>
+
+    <!-- PANTALLA GAME OVER -->
+    <div id="cs-screen-gameover" class="screen-overlay hidden">
+        <div class="modal-box">
+            <div class="ai-avatar">🤖</div>
+            <h2 style="color: var(--cs-neon-red); margin-bottom: 10px; font-size: 18px;">GAME OVER</h2>
+            <p id="cs-death-reason" style="color: #fff; margin-bottom: 15px;">Causa: Desconocida</p>
+            
+            <div id="cs-ai-advice" style="font-size: 10px; color: var(--cs-neon-green); margin-bottom: 20px; min-height: 40px;">
+                Analizando datos de combate...
+            </div>
+
+            <button class="btn-pixel" id="cs-btn-restart">REINTENTAR</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // --- CONFIGURACIÓN ---
+        const API_KEY = 'AIzaSyB38fBRIRcTwWzp7WDioKR2ZHniWpDAsyU'; // Reemplazar con tu Key
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${API_KEY}`;
+
+        // --- REFERENCIAS DOM ---
+        const root = document.getElementById('cyber-smash-root');
+        const canvas = document.getElementById('cs-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const uiScore = document.getElementById('cs-score');
+        const uiLevel = document.getElementById('cs-level');
+        const uiLives = document.getElementById('cs-lives');
+        const screenStart = document.getElementById('cs-screen-start');
+        const screenLevelUp = document.getElementById('cs-screen-levelup');
+        const screenGameOver = document.getElementById('cs-screen-gameover');
+        const btnStart = document.getElementById('cs-btn-start');
+        const btnRestart = document.getElementById('cs-btn-restart');
+        const levelUpTitle = document.getElementById('cs-levelup-title');
+        const levelUpMsg = document.getElementById('cs-levelup-msg');
+        const deathReasonText = document.getElementById('cs-death-reason');
+        const aiAdviceText = document.getElementById('cs-ai-advice');
+
+        // --- ESTADO DEL JUEGO ---
+        let state = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            lives: 3,
+            level: 1,
+            lastTime: 0,
+            spawnTimer: 0,
+            levelTimer: 0,
+            entities: [],
+            particles: []
+        };
+
+        // --- DATOS DE NIVELES ---
+        const BAD_PASSWORDS = ["12345", "admin", "pass", "qwerty", "hola", "amor", "god", "1111"];
+        const PHISHING = ["✉️", "🎣", "🎁", "💸"];
+        const VIRUS = ["🦠", "💀", "🕷️", "💣"];
+        const ALLIES = ["🔒", "🛡️", "🔑"];
+
+        // --- AUDIO CONTEXT ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'hit') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'damage') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // --- CLASES ---
+        class Entity {
+            constructor(x, y, type, content) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'enemy' or 'ally'
+                this.content = content;
+                this.width = 0; // Se calcula al dibujar
+                this.height = 30;
+                this.speed = 1 + (state.level * 0.5);
+                this.markedForDeletion = false;
+                
+                // Color basado en tipo
+                if (type === 'ally') this.color = '#00ff00'; // Verde
+                else if (BAD_PASSWORDS.includes(content)) this.color = '#ff00ff'; // Rosa (Texto)
+                else if (PHISHING.includes(content)) this.color = '#ffff00'; // Amarillo
+                else this.color = '#ff0000'; // Rojo (Virus)
+            }
+
+            update(dt) {
+                this.y += this.speed;
+                if (this.y > canvas.height) {
+                    this.markedForDeletion = true;
+                    if (this.type === 'enemy') {
+                        loseLife("¡Se te escapó una amenaza!");
+                    }
+                }
+            }
+
+            draw(ctx) {
+                ctx.font = "20px 'Press Start 2P'";
+                ctx.fillStyle = this.color;
+                ctx.fillText(this.content, this.x, this.y);
+                
+                // Guardar dimensiones para colisión
+                const metrics = ctx.measureText(this.content);
+                this.width = metrics.width;
+                this.height = 20; // Aprox para la fuente
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 4 + 2;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+                this.life = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 0.05;
+            }
+            draw(ctx) {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // --- GAME LOOP ---
+        function resize() {
+            const rect = root.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resize);
+
+        function startGame() {
+            initAudio();
+            resize();
+            state = {
+                isPlaying: true,
+                isPaused: false,
+                score: 0,
+                lives: 3,
+                level: 1,
+                lastTime: performance.now(),
+                spawnTimer: 0,
+                levelTimer: 0,
+                entities: [],
+                particles: []
+            };
+            
+            updateHUD();
+            screenStart.classList.add('hidden');
+            screenGameOver.classList.add('hidden');
+            requestAnimationFrame(loop);
+        }
+
+        function loop(timestamp) {
+            if (!state.isPlaying) return;
+            
+            const dt = timestamp - state.lastTime;
+            state.lastTime = timestamp;
+
+            if (!state.isPaused) {
+                update(dt);
+                draw();
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        function update(dt) {
+            // 1. Level Timer (20s = 20000ms)
+            state.levelTimer += dt;
+            if (state.levelTimer > 20000) {
+                levelUp();
+            }
+
+            // 2. Spawning
+            state.spawnTimer += dt;
+            // Spawn rate decreases as level increases (faster spawn)
+            const spawnRate = Math.max(500, 2000 - (state.level * 300)); 
+            
+            if (state.spawnTimer > spawnRate) {
+                spawnEntity();
+                state.spawnTimer = 0;
+            }
+
+            // 3. Update Entities
+            state.entities.forEach(e => e.update(dt));
+            state.entities = state.entities.filter(e => !e.markedForDeletion);
+
+            // 4. Update Particles
+            state.particles.forEach(p => p.update());
+            state.particles = state.particles.filter(p => p.life > 0);
+        }
+
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid Effect (Cyberpunk)
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke();
+            }
+            for(let i=0; i<canvas.height; i+=40) {
+                ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke();
+            }
+
+            // Draw Entities
+            state.entities.forEach(e => e.draw(ctx));
+
+            // Draw Particles
+            state.particles.forEach(p => p.draw(ctx));
+
+            // Base Line
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 2);
+            ctx.lineTo(canvas.width, canvas.height - 2);
+            ctx.stroke();
+        }
+
+        // --- LOGIC ---
+        function spawnEntity() {
+            const x = Math.random() * (canvas.width - 100) + 20;
+            const y = -30;
+            
+            // Chance of Ally (20%)
+            if (Math.random() < 0.2) {
+                const content = ALLIES[Math.floor(Math.random() * ALLIES.length)];
+                state.entities.push(new Entity(x, y, 'ally', content));
+                return;
+            }
+
+            // Enemy Selection based on Level
+            let pool = [...BAD_PASSWORDS];
+            if (state.level >= 2) pool = pool.concat(PHISHING);
+            if (state.level >= 3) pool = pool.concat(VIRUS);
+
+            const content = pool[Math.floor(Math.random() * pool.length)];
+            state.entities.push(new Entity(x, y, 'enemy', content));
+        }
+
+        function levelUp() {
+            state.level++;
+            state.levelTimer = 0;
+            state.isPaused = true;
+            
+            // UI Update
+            levelUpTitle.textContent = `¡NIVEL ${state.level}!`;
+            if (state.level === 2) levelUpMsg.textContent = "¡ALERTA: PHISHING DETECTADO!";
+            else if (state.level === 3) levelUpMsg.textContent = "¡PELIGRO: VIRUS ENTRANTE!";
+            else levelUpMsg.textContent = "¡VELOCIDAD AUMENTADA!";
+
+            screenLevelUp.classList.remove('hidden');
+            
+            setTimeout(() => {
+                screenLevelUp.classList.add('hidden');
+                state.isPaused = false;
+                state.lastTime = performance.now(); // Reset delta to avoid jump
+            }, 3000);
+
+            updateHUD();
+        }
+
+        function handleInput(e) {
+            if (!state.isPlaying || state.isPaused) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = (e.clientX || e.touches[0].clientX) - rect.left;
+            const clickY = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            // Check hits (reverse order to hit top-most first)
+            for (let i = state.entities.length - 1; i >= 0; i--) {
+                const ent = state.entities[i];
+                // Simple box collision (Text metrics are approximate)
+                // Text draws from bottom-left usually, so y is bottom.
+                if (
+                    clickX >= ent.x && 
+                    clickX <= ent.x + ent.width &&
+                    clickY >= ent.y - ent.height && 
+                    clickY <= ent.y + 10
+                ) {
+                    // HIT!
+                    if (ent.type === 'enemy') {
+                        destroyEnemy(ent);
+                    } else {
+                        hitAlly(ent);
+                    }
+                    state.entities.splice(i, 1);
+                    return; // Only hit one at a time
+                }
+            }
+        }
+
+        function destroyEnemy(ent) {
+            state.score += 10 * state.level;
+            updateHUD();
+            createExplosion(ent.x, ent.y, ent.color);
+            playSound('hit');
+        }
+
+        function hitAlly(ent) {
+            createExplosion(ent.x, ent.y, '#ff0000');
+            loseLife("Destruiste una defensa aliada");
+        }
+
+        function createExplosion(x, y, color) {
+            for(let i=0; i<10; i++) {
+                state.particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function loseLife(reason) {
+            state.lives--;
+            updateHUD();
+            playSound('damage');
+            
+            // Flash Screen
+            root.classList.add('flash-red');
+            setTimeout(() => root.classList.remove('flash-red'), 200);
+
+            if (state.lives <= 0) {
+                gameOver(reason);
+            }
+        }
+
+        function updateHUD() {
+            uiScore.textContent = state.score;
+            uiLevel.textContent = state.level;
+            uiLives.textContent = "❤️".repeat(state.lives);
+        }
+
+        function gameOver(reason) {
+            state.isPlaying = false;
+            screenGameOver.classList.remove('hidden');
+            deathReasonText.textContent = `Causa: ${reason}`;
+            
+            // Call AI
+            getAIAdvice(reason);
+        }
+
+        // --- AI INTEGRATION ---
+        async function getAIAdvice(reason) {
+            aiAdviceText.innerHTML = 'Conectando con la Base... <span style="animation: blink 1s infinite">_</span>';
+            
+            const prompt = `
+                ACTÚA COMO: "Centinela", un mentor de ciberseguridad en un videojuego arcade.
+                CONTEXTO: El jugador perdió en el Nivel ${state.level} con ${state.score} puntos.
+                CAUSA DE MUERTE: "${reason}".
+                
+                TAREA: Dame un consejo corto (máx 20 palabras) y motivador estilo Pixel Art RPG.
+                Ejemplo: "¡Cuidado con los correos falsos! Verifica el remitente antes de disparar."
+            `;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    })
+                });
+                
+                const data = await response.json();
+                const advice = data.candidates[0].content.parts[0].text;
+                
+                // Typewriter effect for advice
+                typeWriter(advice, aiAdviceText);
+
+            } catch (e) {
+                console.error(e);
+                aiAdviceText.textContent = "ERROR DE COMUNICACIÓN. ¡Inténtalo de nuevo!";
+            }
+        }
+
+        function typeWriter(text, element) {
+            element.textContent = "";
+            let i = 0;
+            const speed = 50;
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // --- EVENT LISTENERS ---
+        btnStart.addEventListener('click', startGame);
+        btnRestart.addEventListener('click', startGame);
+        
+        canvas.addEventListener('mousedown', handleInput);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scroll
+            handleInput(e);
+        }, {passive: false});
+
+    })();
+    </script>
+</div>
+</body>
+</html>

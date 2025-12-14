@@ -1,0 +1,626 @@
+<!-- MÓDULO 2: EL ESLABÓN HUMANO (ENCAPSULADO) -->
+<div id="phishing-module-root">
+    <style>
+        /* Estilos encapsulados estrictamente bajo #phishing-module-root */
+        #phishing-module-root {
+            /* Variables CSS Locales (Scope) */
+            --ph-bg: #0f172a;
+            --ph-panel: #1e293b;
+            --ph-text: #f8fafc;
+            --ph-accent: #0ea5e9; /* Azul por defecto */
+            --ph-danger: #ef4444;
+            --ph-font-mono: 'Courier New', Courier, monospace;
+            --ph-font-sans: 'Segoe UI', system-ui, sans-serif;
+
+            /* Reset y Contenedor Base */
+            font-family: var(--ph-font-sans);
+            background-color: var(--ph-bg);
+            color: var(--ph-text);
+            width: 100%;
+            max-width: 800px;
+            height: 600px; /* Altura fija para el juego */
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.5s ease;
+            box-sizing: border-box;
+        }
+
+        #phishing-module-root * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        /* --- MODOS DE JUEGO (Aplicados al root) --- */
+        #phishing-module-root.mode-elite {
+            --ph-accent: #10b981; /* Verde Matrix */
+            background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
+        }
+
+        #phishing-module-root.mode-nightmare {
+            --ph-accent: #ef4444; /* Rojo Alarma */
+            background: radial-gradient(circle, #450a0a 0%, #000000 100%);
+            animation: ph-panic-pulse 1s infinite alternate;
+        }
+
+        @keyframes ph-panic-pulse {
+            0% { box-shadow: inset 0 0 0px #ef4444; }
+            100% { box-shadow: inset 0 0 50px #ef4444; }
+        }
+
+        /* --- CONTENEDOR DEL JUEGO --- */
+        #phishing-module-root .game-container {
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid var(--ph-accent);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px var(--ph-accent);
+            transition: all 0.5s ease;
+        }
+
+        /* --- HUD CENTINELA --- */
+        #phishing-module-root .centinela-hud {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--ph-accent);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            z-index: 10;
+            min-height: 80px;
+        }
+
+        #phishing-module-root .avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--ph-accent);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #0f172a;
+            box-shadow: 0 0 10px var(--ph-accent);
+            flex-shrink: 0;
+        }
+
+        #phishing-module-root .dialogue-box {
+            flex: 1;
+            font-family: var(--ph-font-mono);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* --- PANTALLAS (Vistas) --- */
+        #phishing-module-root .screen {
+            flex: 1;
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            padding: 1.5rem;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #phishing-module-root .screen.active { display: flex; }
+
+        /* --- FASE 1: ENCUESTA --- */
+        #phishing-module-root .survey-question {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #phishing-module-root .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        #phishing-module-root .btn-option {
+            background: #334155;
+            border: 1px solid var(--ph-accent);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        #phishing-module-root .btn-option:hover {
+            background: var(--ph-accent);
+            color: #0f172a;
+            transform: translateX(5px);
+        }
+
+        /* --- FASE 3: JUEGO --- */
+        #phishing-module-root .game-area {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #phishing-module-root .enemy {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.1s;
+            user-select: none;
+            z-index: 5;
+        }
+        
+        #phishing-module-root .enemy::after { content: "✉️"; }
+        #phishing-module-root .enemy.phishing { background: #fca5a5; border: 2px solid red; }
+        #phishing-module-root .enemy:active { transform: scale(0.9); }
+
+        #phishing-module-root .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-family: var(--ph-font-mono);
+            font-weight: bold;
+        }
+
+        #phishing-module-root .infection-meter {
+            height: 10px;
+            background: #334155;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        #phishing-module-root .infection-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--ph-danger);
+            transition: width 0.2s;
+        }
+
+        /* --- PANTALLA FINAL --- */
+        #phishing-module-root .result-card {
+            text-align: center;
+            background: rgba(0,0,0,0.8);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--ph-accent);
+            margin: auto;
+            max-width: 80%;
+        }
+
+        #phishing-module-root .btn-restart {
+            margin-top: 1.5rem;
+            padding: 0.75rem 2rem;
+            background: var(--ph-accent);
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 480px) {
+            #phishing-module-root { height: 500px; padding: 0; }
+            #phishing-module-root .centinela-hud { padding: 0.5rem; }
+            #phishing-module-root .avatar { width: 40px; height: 40px; font-size: 1.2rem; }
+            #phishing-module-root .dialogue-box { font-size: 0.8rem; }
+        }
+
+    </style>
+
+    <div class="game-container" id="ph-game-container">
+        <!-- HUD SIEMPRE VISIBLE -->
+        <div class="centinela-hud">
+            <div class="avatar">C</div>
+            <div class="dialogue-box" id="ph-centinela-text">
+                Iniciando protocolos...
+            </div>
+        </div>
+
+        <!-- PANTALLA 1: ENCUESTA -->
+        <div id="ph-screen-survey" class="screen active">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <h2 id="ph-question-text" class="survey-question">Cargando interrogatorio...</h2>
+                <div id="ph-options-container" class="options-grid">
+                    <!-- Botones generados por JS -->
+                </div>
+                <div style="margin-top: 1rem; text-align: center; color: #64748b; font-size: 0.8rem;">
+                    Pregunta <span id="ph-q-current">1</span> de 3
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: BRIEFING (TRANSICIÓN) -->
+        <div id="ph-screen-briefing" class="screen" style="justify-content: center; text-align: center;">
+            <h1 style="font-size: 2.5rem; color: var(--ph-accent);" id="ph-mode-title">ANALIZANDO...</h1>
+            <p id="ph-mode-desc" style="font-size: 1.1rem; margin-top: 1rem;">Calculando nivel de riesgo...</p>
+            <button class="btn-restart" id="ph-btn-start-game" style="display: none;">¡DALE VIAJE!</button>
+        </div>
+
+        <!-- PANTALLA 3: JUEGO -->
+        <div id="ph-screen-game" class="screen">
+            <div class="stats-bar">
+                <span>AMENAZAS: <span id="ph-score-display">0</span></span>
+                <span style="color: var(--ph-danger)">INFECCIÓN: <span id="ph-infection-text">0%</span></span>
+            </div>
+            <div class="infection-meter">
+                <div id="ph-infection-bar" class="infection-fill"></div>
+            </div>
+            <div id="ph-game-area" class="game-area">
+                <!-- Enemigos caen aquí -->
+            </div>
+        </div>
+
+        <!-- PANTALLA 4: GAME OVER -->
+        <div id="ph-screen-result" class="screen">
+            <div class="result-card">
+                <h1 id="ph-result-title">SISTEMA CAÍDO</h1>
+                <p id="ph-result-msg">Te comieron los virus, mano.</p>
+                <h2 style="margin: 1rem 0;">Puntaje: <span id="ph-final-score">0</span></h2>
+                <button class="btn-restart" id="ph-btn-restart">INTENTAR DE NUEVO</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // IIFE para encapsular
+    (function() {
+        const API_KEY = 'AIzaSyB38fBRIRcTwWzp7WDioKR2ZHniWpDAsyU';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${API_KEY}`;
+
+        // --- CONFIGURACIÓN Y ESTADO ---
+        const questions = [
+            {
+                q: "¿Dónde guardás tus claves?",
+                options: [
+                    { text: "En mi mente (o un gestor de claves)", risk: 0 },
+                    { text: "En un papelito bajo el teclado", risk: 1 },
+                    { text: "En el mismo navegador", risk: 1 }
+                ]
+            },
+            {
+                q: "¿Qué tan seguido repetís contraseñas?",
+                options: [
+                    { text: "Nunca, soy paranoico", risk: 0 },
+                    { text: "A veces, en cosas sin importancia", risk: 0.5 },
+                    { text: "Siempre, por pura huevonada", risk: 1 }
+                ]
+            },
+            {
+                q: "¿Si te llega un correo de 'Tu Banco' pidiendo datos?",
+                options: [
+                    { text: "Lo borro y entro directo a la app", risk: 0 },
+                    { text: "Le doy clic a ver qué pasa", risk: 1 },
+                    { text: "Reviso el link con lupa", risk: 0 }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let totalRisk = 0;
+        let gameLoop;
+        let spawnInterval;
+        let score = 0;
+        let infection = 0;
+        let isInitialized = false;
+        
+        let gameConfig = {
+            spawnRate: 1000,
+            fallSpeed: 2,
+            infectionRate: 10
+        };
+
+        // --- REFERENCIAS DOM (Scoped IDs) ---
+        const root = document.getElementById('phishing-module-root');
+        const centinelaText = document.getElementById('ph-centinela-text');
+        const gameArea = document.getElementById('ph-game-area');
+        const btnRestart = document.getElementById('ph-btn-restart');
+
+        // --- INICIO ---
+        function initGame() {
+            if (isInitialized) return;
+            isInitialized = true;
+
+            console.log("Centinela Phishing: Iniciando...");
+            typeWriter("¡Qué onda recluta! Soy Centinela. Antes de soltarte en el ruedo contra los hackers, necesito calibrar tus reflejos. Respondé con la verdad, no me des casaca.");
+            loadQuestion();
+        }
+
+        // Inicialización Robusta
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGame);
+        } else {
+            setTimeout(initGame, 500);
+        }
+
+        // --- FASE 1: ENCUESTA ---
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('ph-question-text').textContent = q.q;
+            document.getElementById('ph-q-current').textContent = currentQuestion + 1;
+            
+            const container = document.getElementById('ph-options-container');
+            container.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.textContent = opt.text;
+                btn.onclick = () => handleAnswer(opt.risk);
+                container.appendChild(btn);
+            });
+
+            // Opción Personalizada (IA)
+            const btnCustom = document.createElement('button');
+            btnCustom.className = 'btn-option';
+            btnCustom.style.border = '1px dashed var(--ph-accent)';
+            btnCustom.style.marginTop = '0.5rem';
+            btnCustom.innerHTML = "✍️ <em>Escribir mi propia respuesta...</em>";
+            btnCustom.onclick = showCustomInput;
+            container.appendChild(btnCustom);
+        }
+
+        function showCustomInput() {
+            const container = document.getElementById('ph-options-container');
+            container.innerHTML = '';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'btn-option';
+            input.style.cursor = 'text';
+            input.style.background = '#0f172a';
+            input.placeholder = 'Escribí tu respuesta aquí...';
+            input.autocomplete = 'off';
+
+            const btnAnalyze = document.createElement('button');
+            btnAnalyze.className = 'btn-option';
+            btnAnalyze.style.textAlign = 'center';
+            btnAnalyze.style.fontWeight = 'bold';
+            btnAnalyze.style.background = 'var(--ph-accent)';
+            btnAnalyze.style.color = '#0f172a';
+            btnAnalyze.style.marginTop = '0.5rem';
+            btnAnalyze.textContent = 'ANALIZAR RESPUESTA';
+
+            const btnBack = document.createElement('button');
+            btnBack.style.background = 'none';
+            btnBack.style.border = 'none';
+            btnBack.style.color = '#64748b';
+            btnBack.style.cursor = 'pointer';
+            btnBack.style.marginTop = '1rem';
+            btnBack.style.width = '100%';
+            btnBack.textContent = 'Volver a opciones';
+            btnBack.onclick = loadQuestion;
+
+            btnAnalyze.onclick = () => {
+                if(input.value.trim() === "") return;
+                input.disabled = true;
+                btnAnalyze.textContent = "ANALIZANDO CON IA...";
+                analyzeCustomAnswer(input.value);
+            };
+
+            container.appendChild(input);
+            container.appendChild(btnAnalyze);
+            container.appendChild(btnBack);
+            input.focus();
+        }
+
+        async function analyzeCustomAnswer(answer) {
+            const q = questions[currentQuestion].q;
+            const prompt = `ACTÚA COMO: Centinela (IA de seguridad chapina). Evalúa el riesgo (0=Seguro, 1=Peligroso) de la respuesta: "${answer}" a la pregunta "${q}". Responde SOLO: RIESGO|COMENTARIO. Ejemplo: 1|¡Ala gran, eso no se hace!`;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+                });
+                
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text.trim();
+                let [riskStr, feedback] = text.split('|');
+                let risk = parseFloat(riskStr);
+                if (isNaN(risk)) risk = 0.5;
+
+                typeWriter(feedback || "Analizando...");
+                setTimeout(() => handleAnswer(risk), 3000);
+            } catch (e) {
+                console.error(e);
+                typeWriter("Error de conexión táctica. Asumiendo riesgo medio.");
+                setTimeout(() => handleAnswer(0.5), 2000);
+            }
+        }
+
+        function handleAnswer(risk) {
+            totalRisk += risk;
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                calculateProfile();
+            }
+        }
+
+        // --- FASE 2: PERFILADO ---
+        function calculateProfile() {
+            switchScreen('ph-screen-briefing');
+            const title = document.getElementById('ph-mode-title');
+            const desc = document.getElementById('ph-mode-desc');
+            const btn = document.getElementById('ph-btn-start-game');
+
+            if (totalRisk > 1) {
+                root.classList.add('mode-nightmare');
+                title.textContent = "⚠️ MODO PESADILLA";
+                desc.textContent = "Dificultad: EXTREMA (x2 Velocidad)";
+                gameConfig.spawnRate = 400;
+                gameConfig.fallSpeed = 4;
+                gameConfig.infectionRate = 20;
+                typeWriter("¡Ala gran... Con esos hábitos nos van a comer vivos! 😱 ¡Activando protocolos de emergencia!");
+            } else {
+                root.classList.add('mode-elite');
+                title.textContent = "🛡️ MODO ÉLITE";
+                desc.textContent = "Dificultad: ESTÁNDAR";
+                gameConfig.spawnRate = 1000;
+                gameConfig.fallSpeed = 2;
+                gameConfig.infectionRate = 10;
+                typeWriter("Nítido recluta. Se nota que sos buzo. Defensas estables.");
+            }
+
+            setTimeout(() => {
+                btn.style.display = 'inline-block';
+                btn.onclick = startGame;
+            }, 1000);
+        }
+
+        // --- FASE 3: JUEGO ---
+        function startGame() {
+            switchScreen('ph-screen-game');
+            typeWriter("¡Están cayendo correos de Phishing! ¡Dale clic para eliminarlos antes de que toquen fondo!");
+            
+            spawnInterval = setInterval(spawnEnemy, gameConfig.spawnRate);
+            gameLoop = requestAnimationFrame(updateGame);
+        }
+
+        function spawnEnemy() {
+            const enemy = document.createElement('div');
+            enemy.className = 'enemy phishing';
+            // Posición relativa al contenedor
+            enemy.style.left = Math.random() * (gameArea.clientWidth - 60) + 'px';
+            enemy.style.top = '-40px';
+            
+            enemy.onmousedown = () => {
+                score += 10;
+                document.getElementById('ph-score-display').textContent = score;
+                enemy.remove();
+                flashScreen('rgba(255,255,255,0.1)');
+            };
+
+            gameArea.appendChild(enemy);
+        }
+
+        function updateGame() {
+            const enemies = gameArea.querySelectorAll('.enemy');
+            
+            enemies.forEach(enemy => {
+                let top = parseFloat(enemy.style.top);
+                top += gameConfig.fallSpeed;
+                enemy.style.top = top + 'px';
+
+                if (top > gameArea.clientHeight) {
+                    enemy.remove();
+                    takeDamage();
+                }
+            });
+
+            if (infection < 100) {
+                gameLoop = requestAnimationFrame(updateGame);
+            }
+        }
+
+        function takeDamage() {
+            infection += gameConfig.infectionRate;
+            if (infection > 100) infection = 100;
+            
+            document.getElementById('ph-infection-bar').style.width = infection + '%';
+            document.getElementById('ph-infection-text').textContent = infection + '%';
+            
+            flashScreen('rgba(239, 68, 68, 0.3)');
+
+            if (infection >= 100) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(spawnInterval);
+            cancelAnimationFrame(gameLoop);
+            switchScreen('ph-screen-result');
+            
+            const title = document.getElementById('ph-result-title');
+            const msg = document.getElementById('ph-result-msg');
+            document.getElementById('ph-final-score').textContent = score;
+
+            if (score > 200) {
+                title.textContent = "¡MISIÓN CUMPLIDA!";
+                title.style.color = "var(--ph-accent)";
+                msg.textContent = "Lograste contener el ataque. ¡Sos un máster!";
+                typeWriter("¡Calidad! Sobreviviste al ataque. Ya estás listo para el siguiente nivel.");
+            } else {
+                title.textContent = "SISTEMA INFECTADO";
+                title.style.color = "var(--ph-danger)";
+                msg.textContent = "Se te pasaron demasiados virus.";
+                typeWriter("¡Nos cayó el clavo! El sistema colapsó.");
+            }
+        }
+
+        // --- UTILIDADES ---
+        function switchScreen(id) {
+            root.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function typeWriter(text) {
+            centinelaText.textContent = "";
+            let i = 0;
+            const speed = 30;
+            function type() {
+                if (i < text.length) {
+                    centinelaText.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function flashScreen(color) {
+            const flash = document.createElement('div');
+            flash.style.position = 'absolute';
+            flash.style.top = 0; flash.style.left = 0;
+            flash.style.width = '100%'; flash.style.height = '100%';
+            flash.style.backgroundColor = color;
+            flash.style.pointerEvents = 'none';
+            flash.style.transition = 'opacity 0.1s';
+            document.getElementById('ph-game-container').appendChild(flash);
+            
+            setTimeout(() => {
+                flash.style.opacity = 0;
+                setTimeout(() => flash.remove(), 100);
+            }, 50);
+        }
+
+        // Reiniciar (Recargar solo el módulo es difícil sin recargar página, 
+        // así que reseteamos variables)
+        btnRestart.onclick = () => {
+            // Reset simple: recargar página (lo más seguro para evitar bugs de estado)
+            // Opcional: Implementar reset lógico completo
+            location.reload(); 
+        };
+
+    })();
+    </script>
+</div>

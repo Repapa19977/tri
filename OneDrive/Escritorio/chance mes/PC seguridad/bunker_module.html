@@ -1,0 +1,337 @@
+<!-- MÓDULO 1: LA BÓVEDA (ENCAPSULADO) -->
+<div id="bunker-module-root">
+    <style>
+        /* Estilos encapsulados estrictamente bajo #bunker-module-root */
+        #bunker-module-root {
+            /* Variables CSS Locales (Scope) */
+            --bk-bg: #050a14;
+            --bk-panel: rgba(10, 20, 40, 0.95);
+            --bk-green: #00ff9d;
+            --bk-red: #ff0055;
+            --bk-blue: #00d9ff;
+            --bk-text: #e0e6ed;
+            --bk-font-tech: 'Courier New', Courier, monospace;
+            --bk-font-ui: 'Segoe UI', system-ui, sans-serif;
+
+            /* Reset y Contenedor Base */
+            font-family: var(--bk-font-ui);
+            background-color: var(--bk-bg);
+            color: var(--bk-text);
+            padding: 2rem;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px; /* Ancho máximo para responsive */
+            margin: 0 auto; /* Centrado */
+            box-sizing: border-box;
+            
+            /* Fondo Cyberpunk */
+            background-image: 
+                linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        #bunker-module-root * {
+            box-sizing: border-box;
+        }
+
+        /* --- CARD PRINCIPAL --- */
+        #bunker-module-root .cyber-card {
+            background: var(--bk-panel);
+            border: 1px solid var(--bk-blue);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        /* --- HOLOGRAMA --- */
+        #bunker-module-root .holo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bunker-module-root .holo-lock {
+            font-size: 4rem;
+            filter: drop-shadow(0 0 15px var(--bk-blue));
+            animation: bk-float 3s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+
+        #bunker-module-root .holo-lock.secure {
+            filter: drop-shadow(0 0 25px var(--bk-green));
+            color: var(--bk-green);
+        }
+
+        @keyframes bk-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* --- INPUT --- */
+        #bunker-module-root .cyber-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+            color: var(--bk-green);
+            padding: 1rem;
+            font-family: var(--bk-font-tech);
+            font-size: 1.2rem;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+        }
+
+        #bunker-module-root .cyber-input:focus {
+            border-color: var(--bk-blue);
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+
+        /* --- CHIPS GRID (Responsive) --- */
+        #bunker-module-root .chips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Responsive Grid */
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        #bunker-module-root .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #334155;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-align: center;
+            color: #64748b;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bunker-module-root .chip.active {
+            background: rgba(0, 255, 157, 0.1);
+            border-color: var(--bk-green);
+            color: var(--bk-green);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+        }
+
+        /* --- BOTÓN --- */
+        #bunker-module-root .btn-execute {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            border: 2px solid var(--bk-blue);
+            color: var(--bk-blue);
+            font-family: var(--bk-font-tech);
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        #bunker-module-root .btn-execute:hover {
+            background: var(--bk-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--bk-blue);
+        }
+
+        /* --- TERMINAL IA --- */
+        #bunker-module-root .ai-terminal {
+            margin-top: 2rem;
+            background: #000;
+            border: 1px solid #333;
+            padding: 1rem;
+            font-family: var(--bk-font-tech);
+            font-size: 0.9rem;
+            min-height: 80px;
+            color: var(--bk-green);
+            border-left: 4px solid var(--bk-green);
+            position: relative;
+        }
+
+        /* --- ANIMACIONES --- */
+        #bunker-module-root .shake {
+            animation: bk-shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--bk-red);
+        }
+
+        @keyframes bk-shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        #bunker-module-root .scan-success {
+            animation: bk-pulse-green 1s ease-out;
+        }
+
+        @keyframes bk-pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            100% { box-shadow: 0 0 0 20px rgba(0, 255, 157, 0); }
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 480px) {
+            #bunker-module-root { padding: 1rem; }
+            #bunker-module-root .cyber-card { padding: 1rem; }
+            #bunker-module-root .holo-lock { font-size: 3rem; }
+        }
+    </style>
+
+    <div class="cyber-card" id="bk-main-card">
+        <div class="holo-container">
+            <div id="bk-lock-icon" class="holo-lock">🔓</div>
+        </div>
+
+        <input type="text" id="bk-pass-input" class="cyber-input" placeholder="INGRESAR CÓDIGO..." autocomplete="off">
+
+        <div class="chips-grid">
+            <div class="chip" id="bk-chip-len">📏 12+ Caracteres</div>
+            <div class="chip" id="bk-chip-caps">🔠 Mayúsculas</div>
+            <div class="chip" id="bk-chip-nums">🔢 Números</div>
+            <div class="chip" id="bk-chip-sym">🔣 Símbolos</div>
+        </div>
+
+        <button id="bk-btn-execute" class="btn-execute">EJECUTAR DEFENSA</button>
+
+        <div class="ai-terminal" id="bk-ai-output">
+            ESPERANDO INPUT DEL USUARIO...
+        </div>
+    </div>
+
+    <script>
+    // IIFE para encapsular variables y evitar conflictos globales
+    (function() {
+        const API_KEY = 'AIzaSyB38fBRIRcTwWzp7WDioKR2ZHniWpDAsyU';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${API_KEY}`;
+
+        // Referencias DOM (Scoped IDs)
+        const passInput = document.getElementById('bk-pass-input');
+        const lockIcon = document.getElementById('bk-lock-icon');
+        const btnExecute = document.getElementById('bk-btn-execute');
+        const mainCard = document.getElementById('bk-main-card');
+        const aiOutput = document.getElementById('bk-ai-output');
+
+        const chips = {
+            length: document.getElementById('bk-chip-len'),
+            caps: document.getElementById('bk-chip-caps'),
+            nums: document.getElementById('bk-chip-nums'),
+            sym: document.getElementById('bk-chip-sym')
+        };
+
+        let isSecure = false;
+
+        // Validación
+        passInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            
+            const hasLength = val.length >= 12;
+            toggleChip(chips.length, hasLength);
+
+            const hasCaps = /[A-Z]/.test(val);
+            toggleChip(chips.caps, hasCaps);
+
+            const hasNums = /[0-9]/.test(val);
+            toggleChip(chips.nums, hasNums);
+
+            const hasSym = /[^a-zA-Z0-9]/.test(val);
+            toggleChip(chips.sym, hasSym);
+
+            if (hasLength && hasCaps && hasNums && hasSym) {
+                isSecure = true;
+                lockIcon.textContent = '🔒';
+                lockIcon.classList.add('secure');
+            } else {
+                isSecure = false;
+                lockIcon.textContent = '🔓';
+                lockIcon.classList.remove('secure');
+            }
+        });
+
+        function toggleChip(element, isActive) {
+            if (isActive) element.classList.add('active');
+            else element.classList.remove('active');
+        }
+
+        // Ejecución
+        btnExecute.addEventListener('click', () => {
+            if (passInput.value.trim() === "") return;
+
+            if (isSecure) {
+                mainCard.classList.remove('shake');
+                mainCard.classList.add('scan-success');
+                setTimeout(() => mainCard.classList.remove('scan-success'), 1000);
+                callCentinela(true);
+            } else {
+                mainCard.classList.add('shake');
+                setTimeout(() => mainCard.classList.remove('shake'), 500);
+                callCentinela(false);
+            }
+        });
+
+        // API Call
+        async function callCentinela(isSuccess) {
+            aiOutput.innerHTML = 'ANALIZANDO PATRONES...';
+            const eventCode = isSuccess ? "[EVENTO: CLAVE_FUERTE]" : "[EVENTO: CLAVE_DEBIL]";
+            
+            const systemPrompt = `
+                ACTÚA COMO: "Centinela", IA de ciberseguridad táctica con jerga guatemalteca.
+                MISIÓN: Narrar resultado de ataque hacker.
+                SI [CLAVE_DEBIL]: Regaña amistosamente. "¡Nombre mano! Esa clave es de papel."
+                SI [CLAVE_FUERTE]: Felicita. "¡Nítido! Esa clave es puro concreto."
+                RESPUESTA CORTA (Max 2 frases).
+            `;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        contents: [{ role: "user", parts: [{ text: eventCode }] }]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content) {
+                    typeWriter(data.candidates[0].content.parts[0].text);
+                } else {
+                    aiOutput.textContent = "ERROR TÁCTICO.";
+                }
+            } catch (error) {
+                console.error(error);
+                aiOutput.textContent = "CENTINELA OFFLINE.";
+            }
+        }
+
+        function typeWriter(text) {
+            aiOutput.textContent = "";
+            let i = 0;
+            const speed = 30;
+            function type() {
+                if (i < text.length) {
+                    aiOutput.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+    })();
+    </script>
+</div>

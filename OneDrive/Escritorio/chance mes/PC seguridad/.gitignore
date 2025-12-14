@@ -1,0 +1,24 @@
+# Variables de entorno (NO SUBIR AL REPO)
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+node_modules/
+package-lock.json
+yarn.lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Infinita: Centinela</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- CONTENEDOR TRIVIA ENCAPSULADO -->
+<div id="trivia-infinite-root">
+    <style>
+        /* --- ESTILOS ENCAPSULADOS MINIMALISTAS --- */
+        #trivia-infinite-root {
+            --tr-bg: #ffffff;
+            --tr-bg-secondary: #f8f9fa;
+            --tr-card-bg: #ffffff;
+            --tr-primary: #2d3436; /* Gris oscuro casi negro */
+            --tr-secondary: #00b894; /* Verde fresco */
+            --tr-accent: #ff7675; /* Coral suave */
+            --tr-danger: #d63031;
+            --tr-text: #2d3436;
+            --tr-text-light: #636e72;
+            --tr-border: #dfe6e9;
+            --tr-font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+            font-family: var(--tr-font);
+            background: var(--tr-bg);
+            color: var(--tr-text);
+            width: 100%;
+            max-width: 600px;
+            min-height: 500px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            border: 1px solid var(--tr-border);
+        }
+
+        #trivia-infinite-root * { box-sizing: border-box; }
+
+        /* HEADER MINIMALISTA */
+        #trivia-infinite-root .header {
+            background: var(--tr-primary);
+            color: white;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #trivia-infinite-root .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0px;
+        }
+
+        #trivia-infinite-root .stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        #trivia-infinite-root .stat-badge {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: tr-pulse-subtle 2s ease-in-out infinite;
+            font-size: 0.95rem;
+        }
+
+        #trivia-infinite-root .stat-badge:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        #trivia-infinite-root .stat-badge:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes tr-pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* LOGO CORNER */
+        #trivia-infinite-root .logo-corner {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-weight: 800;
+        }
+
+        /* MARCA DE AGUA */
+        #trivia-infinite-root .watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 8rem;
+            opacity: 0.12;
+            pointer-events: none;
+            user-select: none;
+            font-weight: 900;
+            transform: rotate(-25deg);
+            z-index: 1;
+            color: #2d3436;
+        }
+
+        #trivia-infinite-root .content-area {
+            flex: 1;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #trivia-infinite-root .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* TARJETAS ANIMADAS */
+        #trivia-infinite-root .card-content {
+            width: 100%;
+            animation: tr-fade-in 0.5s ease;
+        }
+
+        @keyframes tr-fade-in {
+            from { 
+                opacity: 0; 
+                transform: translateY(15px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        /* ICONOS */
+        #trivia-infinite-root .lesson-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: tr-bounce 1.2s ease-in-out infinite;
+        }
+
+        @keyframes tr-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* TOPIC TAG MINIMALISTA */
+        #trivia-infinite-root .topic-tag {
+            background: var(--tr-bg-secondary);
+            color: var(--tr-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border: 1px solid var(--tr-border);
+        }
+
+        #trivia-infinite-root h2 {
+            font-size: 1.7rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+            color: var(--tr-primary);
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        #trivia-infinite-root p {
+            font-size: 1rem;
+            color: var(--tr-text-light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        /* BOTONES MINIMALISTAS */
+        #trivia-infinite-root .btn-action {
+            background: var(--tr-primary);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(45, 52, 54, 0.12);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+        }
+
+        #trivia-infinite-root .btn-action:hover {
+            background: var(--tr-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 184, 148, 0.2);
+        }
+
+        #trivia-infinite-root .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        /* OPCIONES */
+        #trivia-infinite-root .options-grid {
+            display: grid;
+            gap: 0.8rem;
+            width: 100%;
+        }
+
+        #trivia-infinite-root .btn-option {
+            background: var(--tr-bg-secondary);
+            border: 2px solid var(--tr-border);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--tr-text);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        #trivia-infinite-root .btn-option:hover {
+            border-color: var(--tr-secondary);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.1);
+            transform: translateX(4px);
+        }
+
+        #trivia-infinite-root .btn-option:active {
+            transform: scale(0.98);
+        }
+
+        #trivia-infinite-root .btn-option-letter {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            background: var(--tr-primary);
+            color: white;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        #trivia-infinite-root .btn-option:hover .btn-option-letter {
+            background: var(--tr-secondary);
+        }
+
+        /* FEEDBACK */
+        #trivia-infinite-root .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.98);
+            z-index: 10;
+            padding: 2rem;
+            backdrop-filter: blur(4px);
+            animation: tr-slide-up 0.4s ease;
+        }
+
+        @keyframes tr-slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #trivia-infinite-root .feedback-icon {
+            font-size: 4rem;
+            margin-bottom: 0.8rem;
+            animation: tr-celebrate 0.5s ease;
+        }
+
+        @keyframes tr-celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-2deg); }
+            75% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        #trivia-infinite-root .feedback-overlay h2 {
+            margin-bottom: 0.4rem;
+            font-size: 1.6rem;
+        }
+
+        #trivia-infinite-root .feedback-overlay > p {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--tr-text-light);
+        }
+
+        #trivia-infinite-root .explanation-box {
+            background: var(--tr-bg-secondary);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--tr-text);
+            border-left: 3px solid var(--tr-primary);
+            animation: tr-slide-in-left 0.5s ease 0.15s backwards;
+        }
+
+        @keyframes tr-slide-in-left {
+            from {
+                opacity: 0;
+                transform: translateX(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #trivia-infinite-root .explanation-box strong {
+            color: var(--tr-primary);
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #trivia-infinite-root .correct { 
+            color: var(--tr-secondary); 
+        }
+
+        #trivia-infinite-root .wrong { 
+            color: var(--tr-danger);
+        }
+
+        /* LOADER */
+        #trivia-infinite-root .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--tr-border);
+            border-top-color: var(--tr-primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            #trivia-infinite-root { border-radius: 0; height: 100vh; max-height: none; box-shadow: none; border: none; }
+            #trivia-infinite-root .header { padding: 1.5rem 1rem; }
+            #trivia-infinite-root .content-area { padding: 1.5rem 1rem; }
+            #trivia-infinite-root h2 { font-size: 1.4rem; }
+            #trivia-infinite-root .btn-action { padding: 0.8rem 1.6rem; font-size: 0.9rem; }
+        }
+    </style>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <div style="font-size: 1.8rem;">🔐</div>
+            <div style="font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">NIVEL</div>
+        </div>
+        <div class="stats">
+            <div class="stat-badge">❤️ <span id="tr-lives">5</span></div>
+            <div class="stat-badge">🔥 <span id="tr-streak">0</span>/5</div>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8; margin-bottom: 0.2rem; text-transform: uppercase;">Nivel</div>
+            <div style="font-size: 1.5rem; font-weight: 800;">⚔️ <span id="tr-level">1</span></div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO DINÁMICO -->
+    <div id="tr-content" class="content-area">
+        <div class="watermark">🔐</div>
+        <div class="loader"></div>
+        <p style="margin-top: 1rem; font-weight: bold;">Iniciando sistema...</p>
+    </div>
+
+    <script>
+    (function() {
+        // --- CONFIGURACIÓN ---
+        // API Key ahora se maneja en el backend (server.js)
+        // El frontend NO conoce la clave - está protegida
+        const BACKEND_URL = 'http://localhost:3000/api/trivia';
+        
+        // Lista de modelos (para reintentos)
+        const MODELS = ['gemini-3-pro-preview', 'gemini-1.5-flash', 'gemini-pro'];
+        let currentModelIndex = 0;
+
+        // --- ESTADO ---
+        let state = {
+            lives: 5,
+            level: 1,
+            streak: 0,
+            currentData: null,
+            isLoading: false,
+            questionCount: 0,  // Contador para forzar variedad
+            usedTopics: []     // Evitar repetición de temas
+        };
+
+        // --- REFERENCIAS DOM ---
+        const contentArea = document.getElementById('tr-content');
+        const uiLives = document.getElementById('tr-lives');
+        const uiStreak = document.getElementById('tr-streak');
+        const uiLevel = document.getElementById('tr-level');
+
+        // --- INICIO ---
+        initGame();
+
+        function initGame() {
+            state.lives = 5;
+            state.level = 1;
+            state.streak = 0;
+            state.questionCount = 0;
+            state.usedTopics = [];
+            updateStats();
+            fetchTrivia();
+        }
+
+        // --- API FETCH CON FALLBACK ---
+        async function fetchTrivia() {
+            showLoading();
+            state.questionCount++;
+            
+            // Dificultad según nivel
+            let difficultyText = '';
+            let topicArea = '';
+            let progressionLevel = state.level;
+            
+            if (state.level === 1) {
+                difficultyText = 'BÁSICO';
+                topicArea = 'Contraseñas, Información Personal, Internet Seguro, Privacidad, Amigos Online';
+            } else if (state.level === 2) {
+                difficultyText = 'INTERMEDIO';
+                topicArea = 'Phishing, Malware, Redes WiFi, Descargas, Spam, Estafas Online';
+            } else if (state.level === 3) {
+                difficultyText = 'AVANZADO';
+                topicArea = 'Antivirus, Firewalls, Vulnerabilidades, Actualizaciones, Ransomware';
+            } else {
+                difficultyText = 'EXPERTO';
+                topicArea = 'Criptografía, Seguridad Avanzada, Ataques Sofisticados, Deep Web';
+            }
+            
+            const prompt = `
+ROL: Eres un Instructor Experto en Seguridad Digital. Tu audiencia son personas que aprenden mejor con ANALOGÍAS DEL MUNDO REAL.
+
+REGLA DE ORO:
+1. NO TECNICISMOS SIN EXPLICAR: Si dices "Phishing", antes explica "Estafa por correo".
+2. USA ANALOGÍAS: Contraseña = Llave de tu casa. Firewall = Guardia de la garita. Virus = Gripe que se pega.
+3. CERO INFANTILIZACIÓN: Lenguaje profesional y respetuoso.
+4. IMPACTO REAL: Si falla la seguridad, explica qué se pierde: dinero, reputación, trabajo, documentos.
+
+PROGRESIÓN (Nivel ${progressionLevel}, ${difficultyText}):
+${progressionLevel <= 2 ? '- Analogías SIMPLES (Casa, Carro, Cartera)' : progressionLevel <= 4 ? '- Analogías de OFICINA (Archivos, Sobres cerrados)' : '- Analogías de SEGURIDAD BANCARIA (Cajas fuertes, Auditorías)'}
+
+GENERA UNA PREGUNTA NUEVA Y DIFERENTE (Pregunta #${state.questionCount}):
+- Tema: Elige uno de: ${topicArea}
+- Situación REAL que alguien podría enfrentar
+- 3 opciones (1 correcta, 2 plausibles pero incorrectas)
+- Explicación clara usando analogías (máx 20 palabras)
+
+RESPUESTA EN JSON ESTRICTO:
+{
+    "topic": "Tema específico elegido",
+    "lesson": "Lección breve con analogía (ej: 'La contraseña es como la llave de tu casa. Si la pierdes, alguien entra.')",
+    "question": "Situación real: ¿Qué haces? ¿Cuál es el riesgo?",
+    "options": ["Opción correcta (la más segura)", "Opción falsa realista", "Opción falsa realista"],
+    "correctIndex": 0,
+    "explanation": "Por qué es correcta + Qué pasa si fallas (dinero/reputación/trabajo perdido)"
+}
+
+SIN MARKDOWN, SIN EXPLICACIONES EXTRA, SOLO JSON.
+            `;
+
+            try {
+                await callApi(prompt);
+            } catch (error) {
+                console.warn(`Fallo con modelo ${MODELS[currentModelIndex]}:`, error);
+                
+                // Estrategia de Fallback: Probar siguiente modelo
+                currentModelIndex++;
+                if (currentModelIndex < MODELS.length) {
+                    console.log(`Reintentando con ${MODELS[currentModelIndex]}...`);
+                    fetchTrivia(); // Recursión segura
+                } else {
+                    // Se agotaron los modelos
+                    currentModelIndex = 0;
+                    showError(error);
+                }
+            }
+        }
+
+        async function callApi(prompt) {
+            // Llamar al backend seguro en lugar de Gemini directamente
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    modelIndex: currentModelIndex
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error en servidor: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            // Si el modelo no está disponible, reintentar con el siguiente
+            if (result.retry && result.nextModelIndex < MODELS.length) {
+                console.log(`Modelo no disponible, reintentando con ${MODELS[result.nextModelIndex]}...`);
+                currentModelIndex = result.nextModelIndex;
+                return callApi(prompt); // Reintento recursivo
+            }
+
+            if (!result.success) {
+                throw new Error(result.error || "Error desconocido");
+            }
+
+            state.currentData = result.data;
+            
+            // Mezclar opciones aleatoriamente
+            shuffleOptions(state.currentData);
+            
+            showLesson();
+        }
+
+        // Función para mezclar las opciones y actualizar el índice correcto
+        function shuffleOptions(data) {
+            if (!data.options || data.options.length === 0) return;
+            
+            // Guardar la respuesta correcta
+            const correctAnswer = data.options[data.correctIndex];
+            
+            // Crear array de índices y mezclar
+            const indices = Array.from({ length: data.options.length }, (_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            
+            // Reorganizar opciones según índices mezclados
+            const newOptions = indices.map(i => data.options[i]);
+            data.options = newOptions;
+            
+            // Encontrar la nueva posición de la respuesta correcta
+            data.correctIndex = newOptions.indexOf(correctAnswer);
+        }
+
+        // --- VISTAS ---
+        function showLoading() {
+            contentArea.innerHTML = `
+                <div class="card-content">
+                    <div class="loader" style="border-top-color: var(--tr-primary);"></div>
+                    <p style="margin: 1rem 0 0 0; font-weight: 600; color: var(--tr-primary); font-size: 0.95rem;">Generando pregunta...</p>
+                </div>
+            `;
+        }
+
+        function showLesson() {
+            const { topic, lesson } = state.currentData;
+            contentArea.innerHTML = `
+                <div class="card-content">
+                    <span class="lesson-icon">💡</span>
+                    <span class="topic-tag">${topic}</span>
+                    <h2>¡Dato Importante!</h2>
+                    <p>${lesson}</p>
+                    <button id="tr-btn-understood" class="btn-action">Continuar →</button>
+                </div>
+            `;
+            document.getElementById('tr-btn-understood').onclick = showQuestion;
+        }
+
+        function showQuestion() {
+            const { question, options } = state.currentData;
+            
+            let optionsHTML = options.map((opt, index) => 
+                `<button class="btn-option" onclick="window.trHandleAnswer(${index})">
+                    <span class="btn-option-letter">${String.fromCharCode(65 + index)}</span>
+                    <span>${opt}</span>
+                </button>`
+            ).join('');
+
+            contentArea.innerHTML = `
+                <div class="card-content">
+                    <span class="lesson-icon">❓</span>
+                    <h2>${question}</h2>
+                    <div class="options-grid" style="margin-top: 1.5rem;">
+                        ${optionsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(error) {
+            let msg = "No pudimos conectar con la IA.";
+            
+            contentArea.innerHTML = `
+                <div style="padding: 2rem; text-align: center; color: var(--tr-danger);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; animation: tr-bounce 1s ease-in-out infinite;">⚠️</div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 0.4rem; color: var(--tr-primary);">Error de Conexión</h3>
+                    <p style="color: var(--tr-text-light); margin-bottom: 1.2rem; font-size: 0.95rem;">${msg}</p>
+                    <div style="background: var(--tr-bg-secondary); border-left: 3px solid var(--tr-danger); padding: 0.8rem; border-radius: 6px; margin: 1rem 0; font-size: 0.75rem; color: #666; word-break: break-all; text-align: left;">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                    <button onclick="location.reload()" class="btn-action" style="margin-top:1rem;">Reintentar</button>
+                </div>
+            `;
+        }
+
+        // --- LÓGICA DE JUEGO ---
+        window.trHandleAnswer = function(selectedIndex) {
+            const correctIndex = state.currentData.correctIndex;
+            if (selectedIndex === correctIndex) handleCorrect();
+            else handleIncorrect();
+        };
+
+        function handleCorrect() {
+            state.streak++;
+            updateStats();
+            
+            if (state.streak % 5 === 0) {
+                state.level++;
+                state.usedTopics = []; // Reset temas
+                showFeedback(true, "🚀 ¡NIVEL COMPLETADO!", `¡Subiste al <strong style="font-size: 1.2rem;">NIVEL ${state.level}</strong>! Las preguntas serán más desafiantes...`);
+            } else {
+                const msgs = [
+                    "🎯 ¡Excelente!",
+                    "⭐ ¡Muy bien!",
+                    "✨ ¡Correcto!",
+                    "🔥 ¡Vas muy bien!",
+                    "💪 ¡Impresionante!"
+                ];
+                const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                const remaining = 5 - state.streak;
+                showFeedback(true, msg, `Racha: <strong>${state.streak}/5</strong> | Faltan <strong>${remaining}</strong> para subir de nivel`);
+            }
+        }
+
+        function handleIncorrect() {
+            state.lives--;
+            state.streak = 0;
+            updateStats();
+            
+            if (state.lives <= 0) {
+                showGameOver();
+            } else {
+                const correctAnswer = state.currentData.options[state.currentData.correctIndex];
+                showFeedback(false, "❌ Incorrecto", `La respuesta correcta era: "${correctAnswer}"`);
+            }
+        }
+
+        function showFeedback(isCorrect, title, msg) {
+            const colorClass = isCorrect ? 'correct' : 'wrong';
+            const icon = isCorrect ? '✓' : '✕';
+            
+            // Siempre mostrar la explicación
+            const explanation = state.currentData.explanation || '';
+            
+            const borderColor = isCorrect ? 'var(--tr-secondary)' : 'var(--tr-danger)';
+            
+            contentArea.innerHTML += `
+                <div class="feedback-overlay">
+                    <div class="feedback-icon">${isCorrect ? '🎉' : '⚠️'}</div>
+                    <h2 class="${colorClass}">${title}</h2>
+                    <p>${msg}</p>
+                    <div class="explanation-box" style="border-left-color: ${borderColor};">
+                        <strong>📚 Explicación</strong>
+                        ${explanation}
+                    </div>
+                    <button id="tr-btn-next" class="btn-action" style="margin-top: 0.5rem;">Siguiente →</button>
+                </div>
+            `;
+            document.getElementById('tr-btn-next').onclick = fetchTrivia;
+        }
+
+        function showGameOver() {
+            contentArea.innerHTML = `
+                <div class="card-content">
+                    <span class="lesson-icon">🏁</span>
+                    <h2 style="color: var(--tr-danger);">Sesión Terminada</h2>
+                    <p style="font-size: 0.95rem; margin: 1rem 0; color: var(--tr-text-light);">Has alcanzado un buen nivel. ¡Sigue practicando!</p>
+                    <div style="background: var(--tr-bg-secondary); padding: 1.2rem; border-radius: 8px; margin: 1.5rem 0; border: 1px solid var(--tr-border);">
+                        <div style="font-size: 0.8rem; color: var(--tr-text-light); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Nivel Alcanzado</div>
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--tr-secondary);">NIVEL ${state.level}</div>
+                    </div>
+                    <button id="tr-btn-restart" class="btn-action" style="background: var(--tr-secondary); margin-top: 1rem;">Jugar Nuevamente</button>
+                </div>
+            `;
+            document.getElementById('tr-btn-restart').onclick = initGame;
+        }
+
+        function updateStats() {
+            uiLives.textContent = state.lives;
+            uiStreak.textContent = state.streak;
+            uiLevel.textContent = state.level;
+        }
+
+    })();
+    </script>
+</div>
+</body>
+</html>
