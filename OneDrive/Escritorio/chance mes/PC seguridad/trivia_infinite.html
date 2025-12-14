@@ -439,8 +439,8 @@
         // El frontend NO conoce la clave - está protegida
         const BACKEND_URL = 'http://localhost:3000/api/trivia';
         
-        // Lista de modelos (para reintentos)
-        const MODELS = ['gemini-3-pro-preview', 'gemini-1.5-flash', 'gemini-pro'];
+        // Usar SOLO gemini-3-pro-preview
+        const MODELS = ['gemini-3-pro-preview'];
         let currentModelIndex = 0;
 
         // --- ESTADO ---
@@ -531,18 +531,8 @@ SIN MARKDOWN, SIN EXPLICACIONES EXTRA, SOLO JSON.
             try {
                 await callApi(prompt);
             } catch (error) {
-                console.warn(`Fallo con modelo ${MODELS[currentModelIndex]}:`, error);
-                
-                // Estrategia de Fallback: Probar siguiente modelo
-                currentModelIndex++;
-                if (currentModelIndex < MODELS.length) {
-                    console.log(`Reintentando con ${MODELS[currentModelIndex]}...`);
-                    fetchTrivia(); // Recursión segura
-                } else {
-                    // Se agotaron los modelos
-                    currentModelIndex = 0;
-                    showError(error);
-                }
+                console.error(`Fallo con gemini-3-pro-preview:`, error);
+                showError(error);
             }
         }
 
@@ -562,13 +552,6 @@ SIN MARKDOWN, SIN EXPLICACIONES EXTRA, SOLO JSON.
             }
 
             const result = await response.json();
-
-            // Si el modelo no está disponible, reintentar con el siguiente
-            if (result.retry && result.nextModelIndex < MODELS.length) {
-                console.log(`Modelo no disponible, reintentando con ${MODELS[result.nextModelIndex]}...`);
-                currentModelIndex = result.nextModelIndex;
-                return callApi(prompt); // Reintento recursivo
-            }
 
             if (!result.success) {
                 throw new Error(result.error || "Error desconocido");
